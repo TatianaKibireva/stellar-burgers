@@ -1,5 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { TIngredient, TConstructorIngredient } from '@utils-types';
+import { v4 as uuid } from 'uuid';
 
 type TBurgerConstructorState = {
   bun: TIngredient | null;
@@ -35,7 +36,7 @@ const burgerConstructorSlice = createSlice({
           // начинкам и соусам добавляем свой id
           const constructorIngredient: TConstructorIngredient = {
             ...ingredient,
-            id: `${ingredient._id}-${Date.now()}`
+            id: uuid()
           };
           return { payload: constructorIngredient };
         }

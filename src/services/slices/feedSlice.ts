@@ -3,10 +3,7 @@ import { TOrder, TOrdersData } from '@utils-types';
 import { getFeedsApi } from '../../utils/burger-api';
 
 // асинхронная Thunk-функция
-export const fetchFeeds = createAsyncThunk('feed/fetchAll', async () => {
-  const response = await getFeedsApi();
-  return response;
-});
+export const fetchFeeds = createAsyncThunk('feed/fetchAll', getFeedsApi);
 
 type TFeedState = {
   orders: TOrder[];

@@ -11,35 +11,26 @@ export const BurgerIngredients: FC = () => {
 
   // данные из стора
   const ingredients = useSelector((state) => state.ingredients.ingredients);
-  const isLoading = useSelector((state) => state.ingredients.loading); // Добавил состояние загрузки
-  const constructorItems = useSelector((state) => state.burgerConstructor);
+  const isLoading = useSelector((state) => state.ingredients.loading);
 
   useEffect(() => {
-    // загружаем ингредиенты при монтировании компонента
     dispatch(fetchIngredients());
   }, [dispatch]);
 
   // ингредиенты по типу (фильтрация)
-  const buns = ingredients.filter((item) => item.type === 'bun');
-  const mains = ingredients.filter((item) => item.type === 'main');
-  const sauces = ingredients.filter((item) => item.type === 'sauce');
+  const buns = useMemo(
+    () => ingredients.filter((ingredient) => ingredient.type === 'bun'),
+    [ingredients]
+  );
+  const mains = useMemo(
+    () => ingredients.filter((ingredient) => ingredient.type === 'main'),
+    [ingredients]
+  );
+  const sauces = useMemo(
+    () => ingredients.filter((ingredient) => ingredient.type === 'sauce'),
+    [ingredients]
+  );
 
-  // добавляем подсчет ингредиентов в конструкторе
-  const ingredientsCounters = useMemo(() => {
-    const counters: { [key: string]: number } = {};
-
-    // считаем булки
-    if (constructorItems.bun) {
-      counters[constructorItems.bun._id] = 2;
-    }
-
-    // считаем начинки и соусы
-    constructorItems.ingredients.forEach((ingredient) => {
-      counters[ingredient._id] = (counters[ingredient._id] || 0) + 1;
-    });
-
-    return counters;
-  }, [constructorItems]);
   // отслеживание видимости разделов
   const [currentTab, setCurrentTab] = useState<TTabMode>('bun');
   const titleBunRef = useRef<HTMLHeadingElement>(null);

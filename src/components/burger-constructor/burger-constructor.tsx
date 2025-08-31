@@ -4,7 +4,6 @@ import { BurgerConstructorUI } from '@ui';
 import { useSelector, useDispatch } from '../../services/store';
 import { createOrder, clearOrder } from '../../services/slices/orderSlice';
 import { useNavigate } from 'react-router-dom';
-import { clearConstructor } from '../../services/slices/burgerConstructorSlice';
 
 export const BurgerConstructor: FC = () => {
   const dispatch = useDispatch();
@@ -29,14 +28,14 @@ export const BurgerConstructor: FC = () => {
       constructorItems.bun._id,
       ...constructorItems.ingredients.map(
         (ing: TConstructorIngredient) => ing._id
-      )
+      ),
+      constructorItems.bun._id
     ];
 
     dispatch(createOrder(ingredientIds));
   };
   const closeOrderModal = () => {
     dispatch(clearOrder());
-    dispatch(clearConstructor());
   };
 
   const price = useMemo(

@@ -1,7 +1,7 @@
 import { ConstructorPage } from '../../pages';
 import '../../index.css';
 import styles from './app.module.css';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, useLocation } from 'react-router-dom';
 import { useEffect } from 'react';
 
 import { AppHeader } from '../../components';
@@ -20,18 +20,27 @@ import { NotFound404 } from '../../pages/not-fount-404';
 import { ProtectedRoute } from '../../components/protected-route';
 import { useDispatch } from '../../services/store';
 import { checkUserAuth } from '../../services/slices/authSlice';
+import { fetchIngredients } from '../../services/slices/ingredientsSlice';
 
 const App = () => {
   const dispatch = useDispatch();
+  const location = useLocation();
+  const background = location.state && location.state.background;
 
   useEffect(() => {
     dispatch(checkUserAuth());
+    dispatch(fetchIngredients());
   }, [dispatch]);
+
+  const handleModalClose = () => {
+    window.history.back();
+  };
+
   return (
     <>
       <div className={styles.app}>
         <AppHeader />
-        <Routes>
+        <Routes location={background || location}>
           <Route path='/' element={<ConstructorPage />} />
 
           {/* ингредиенты */}
@@ -128,6 +137,41 @@ const App = () => {
           {/* ошибка 404 */}
           <Route path='*' element={<NotFound404 />} />
         </Routes>
+        {background && (
+          <Routes>
+            {/* модальное окно деталей ингредиента */}
+            <Route
+              path='/ingredients/:id'
+              element={
+                <Modal title='Детали ингредиента' onClose={handleModalClose}>
+                  <IngredientDetails />
+                </Modal>
+              }
+            />
+
+            {/* модальное окно деталей заказа из ленты */}
+            <Route
+              path='/feed/:number'
+              element={
+                <Modal title='Детали заказа' onClose={handleModalClose}>
+                  <OrderInfo />
+                </Modal>
+              }
+            />
+
+            {/* модальное окно деталей заказа в профиле */}
+            <Route
+              path='/profile/orders/:number'
+              element={
+                <ProtectedRoute>
+                  <Modal title='Детали заказа' onClose={handleModalClose}>
+                    <OrderInfo />
+                  </Modal>
+                </ProtectedRoute>
+              }
+            />
+          </Routes>
+        )}
       </div>
     </>
   );

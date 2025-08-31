@@ -1,11 +1,13 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { TOrder } from '@utils-types';
 import { orderBurgerApi } from '../../utils/burger-api';
+import { clearConstructor } from './burgerConstructorSlice';
 
 export const createOrder = createAsyncThunk(
   'order/create',
-  async (ingredientIds: string[]) => {
+  async (ingredientIds: string[], { dispatch }) => {
     const response = await orderBurgerApi(ingredientIds);
+    dispatch(clearConstructor());
     return response.order;
   }
 );
