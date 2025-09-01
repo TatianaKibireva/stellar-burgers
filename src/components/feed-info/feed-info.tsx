@@ -9,7 +9,9 @@ const getOrders = (orders: TOrder[], status: string): number[] =>
     .map((item) => item.number)
     .slice(0, 20);
 
-export const FeedInfo: FC = () => {
+export const FeedInfo: FC<{ currentOrder?: TOrder | null }> = ({
+  currentOrder
+}) => {
   const orders = useSelector((state) => state.feed.orders);
   const totalFeed = useSelector((state) => state.feed.feed);
 
@@ -21,6 +23,7 @@ export const FeedInfo: FC = () => {
       readyOrders={readyOrders}
       pendingOrders={pendingOrders}
       feed={totalFeed}
+      currentOrder={currentOrder}
     />
   );
 };

@@ -1,24 +1,41 @@
 import { FC, useMemo } from 'react';
 import { Preloader } from '../ui/preloader';
 import { OrderInfoUI } from '../ui/order-info';
-import { TIngredient } from '@utils-types';
+import { TIngredient, TOrder } from '@utils-types';
 import { useSelector } from '../../services/store';
+import { useParams } from 'react-router-dom';
 
-export const OrderInfo: FC = () => {
+export type TOrderInfoProps = {
+  orderData?: TOrder | null;
+};
+
+export const OrderInfo: FC<TOrderInfoProps> = ({
+  orderData: externalOrderData
+}) => {
   const orderData = useSelector((state) => state.order.order);
   const ingredients = useSelector((state) => state.ingredients.ingredients);
+  const { number } = useParams<{ number: string }>();
+  const feedOrders = useSelector((state) => state.feed.orders);
+  const profileOrders = useSelector((state) => state.orders.orders);
 
-  /* готовим данные для отображения */
+  const currentOrderData = useMemo(() => {
+    if (externalOrderData) return externalOrderData;
+    if (!number) return orderData;
+
+    const orderNumber = parseInt(number);
+    const feedOrder = feedOrders.find((order) => order.number === orderNumber);
+    if (feedOrder) return feedOrder;
+    return orderData;
+  }, [externalOrderData, number, feedOrders, profileOrders, orderData]);
+
   const orderInfo = useMemo(() => {
-    if (!orderData || !ingredients.length) return null;
-
-    const date = new Date(orderData.createdAt);
-
+    if (!currentOrderData || !ingredients.length) return null;
+    const date = new Date(currentOrderData.createdAt);
     type TIngredientsWithCount = {
       [key: string]: TIngredient & { count: number };
     };
 
-    const ingredientsInfo = orderData.ingredients.reduce(
+    const ingredientsInfo = currentOrderData.ingredients.reduce(
       (acc: TIngredientsWithCount, item) => {
         if (!acc[item]) {
           const ingredient = ingredients.find((ing) => ing._id === item);
@@ -43,12 +60,18 @@ export const OrderInfo: FC = () => {
     );
 
     return {
-      ...orderData,
+      _id: currentOrderData._id,
+      status: currentOrderData.status,
+      name: currentOrderData.name,
+      createdAt: currentOrderData.createdAt,
+      updatedAt: currentOrderData.updatedAt,
+      number: currentOrderData.number,
+      ingredients: currentOrderData.ingredients,
       ingredientsInfo,
       date,
       total
     };
-  }, [orderData, ingredients]);
+  }, [currentOrderData, ingredients]);
 
   if (!orderInfo) {
     return <Preloader />;

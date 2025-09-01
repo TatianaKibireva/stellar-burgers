@@ -8,4 +8,5 @@ export type FeedUIProps = {
     total: number;
     totalToday: number;
   };
+  currentOrder?: TOrder | null
 };
