@@ -1,9 +1,10 @@
-import { FC, useMemo } from 'react';
+import { FC, useMemo, useEffect } from 'react';
 import { Preloader } from '../ui/preloader';
 import { OrderInfoUI } from '../ui/order-info';
 import { TIngredient, TOrder } from '@utils-types';
-import { useSelector } from '../../services/store';
+import { useSelector, useDispatch } from '../../services/store';
 import { useParams } from 'react-router-dom';
+import { getOrderByNumber } from '../../services/slices/orderSlice';
 
 export type TOrderInfoProps = {
   orderData?: TOrder | null;
@@ -12,11 +13,19 @@ export type TOrderInfoProps = {
 export const OrderInfo: FC<TOrderInfoProps> = ({
   orderData: externalOrderData
 }) => {
+  const dispatch = useDispatch();
   const orderData = useSelector((state) => state.order.order);
+  const orderByNumber = useSelector((state) => state.order.orderByNumber);
   const ingredients = useSelector((state) => state.ingredients.ingredients);
   const { number } = useParams<{ number: string }>();
   const feedOrders = useSelector((state) => state.feed.orders);
   const profileOrders = useSelector((state) => state.orders.orders);
+
+  useEffect(() => {
+    if (number && !orderByNumber) {
+      dispatch(getOrderByNumber(+number))
+    }
+  }, [dispatch, number, orderByNumber]);
 
   const currentOrderData = useMemo(() => {
     if (externalOrderData) return externalOrderData;
@@ -25,8 +34,18 @@ export const OrderInfo: FC<TOrderInfoProps> = ({
     const orderNumber = parseInt(number);
     const feedOrder = feedOrders.find((order) => order.number === orderNumber);
     if (feedOrder) return feedOrder;
+    if (orderByNumber && orderByNumber.number === orderNumber) {
+      return orderByNumber;
+    }
     return orderData;
-  }, [externalOrderData, number, feedOrders, profileOrders, orderData]);
+  }, [
+    externalOrderData,
+    number,
+    feedOrders,
+    profileOrders,
+    orderData,
+    orderByNumber
+  ]);
 
   const orderInfo = useMemo(() => {
     if (!currentOrderData || !ingredients.length) return null;
