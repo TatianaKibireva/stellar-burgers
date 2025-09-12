@@ -3,10 +3,15 @@ import React, { FC, memo } from 'react';
 import styles from './feed-info.module.css';
 
 import { FeedInfoUIProps, HalfColumnProps, TColumnProps } from './type';
+import { OrderInfo } from '../../order-info';
 
 export const FeedInfoUI: FC<FeedInfoUIProps> = memo(
-  ({ feed, readyOrders, pendingOrders }) => {
+  ({ feed, readyOrders, pendingOrders, currentOrder }) => {
     const { total, totalToday } = feed;
+
+    if (currentOrder) {
+      return <OrderInfo orderData={currentOrder} />;
+    }
 
     return (
       <section>

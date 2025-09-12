@@ -1,33 +1,60 @@
-import { FC, useMemo } from 'react';
+import { FC, useMemo, useEffect } from 'react';
 import { Preloader } from '../ui/preloader';
 import { OrderInfoUI } from '../ui/order-info';
-import { TIngredient } from '@utils-types';
+import { TIngredient, TOrder } from '@utils-types';
+import { useSelector, useDispatch } from '../../services/store';
+import { useParams } from 'react-router-dom';
+import { getOrderByNumber } from '../../services/slices/orderSlice';
 
-export const OrderInfo: FC = () => {
-  /** TODO: взять переменные orderData и ingredients из стора */
-  const orderData = {
-    createdAt: '',
-    ingredients: [],
-    _id: '',
-    status: '',
-    name: '',
-    updatedAt: 'string',
-    number: 0
-  };
+export type TOrderInfoProps = {
+  orderData?: TOrder | null;
+};
 
-  const ingredients: TIngredient[] = [];
+export const OrderInfo: FC<TOrderInfoProps> = ({
+  orderData: externalOrderData
+}) => {
+  const dispatch = useDispatch();
+  const orderData = useSelector((state) => state.order.order);
+  const orderByNumber = useSelector((state) => state.order.orderByNumber);
+  const ingredients = useSelector((state) => state.ingredients.ingredients);
+  const { number } = useParams<{ number: string }>();
+  const feedOrders = useSelector((state) => state.feed.orders);
+  const profileOrders = useSelector((state) => state.orders.orders);
 
-  /* Готовим данные для отображения */
+  useEffect(() => {
+    if (number && !orderByNumber) {
+      dispatch(getOrderByNumber(+number))
+    }
+  }, [dispatch, number, orderByNumber]);
+
+  const currentOrderData = useMemo(() => {
+    if (externalOrderData) return externalOrderData;
+    if (!number) return orderData;
+
+    const orderNumber = parseInt(number);
+    const feedOrder = feedOrders.find((order) => order.number === orderNumber);
+    if (feedOrder) return feedOrder;
+    if (orderByNumber && orderByNumber.number === orderNumber) {
+      return orderByNumber;
+    }
+    return orderData;
+  }, [
+    externalOrderData,
+    number,
+    feedOrders,
+    profileOrders,
+    orderData,
+    orderByNumber
+  ]);
+
   const orderInfo = useMemo(() => {
-    if (!orderData || !ingredients.length) return null;
-
-    const date = new Date(orderData.createdAt);
-
+    if (!currentOrderData || !ingredients.length) return null;
+    const date = new Date(currentOrderData.createdAt);
     type TIngredientsWithCount = {
       [key: string]: TIngredient & { count: number };
     };
 
-    const ingredientsInfo = orderData.ingredients.reduce(
+    const ingredientsInfo = currentOrderData.ingredients.reduce(
       (acc: TIngredientsWithCount, item) => {
         if (!acc[item]) {
           const ingredient = ingredients.find((ing) => ing._id === item);
@@ -52,12 +79,18 @@ export const OrderInfo: FC = () => {
     );
 
     return {
-      ...orderData,
+      _id: currentOrderData._id,
+      status: currentOrderData.status,
+      name: currentOrderData.name,
+      createdAt: currentOrderData.createdAt,
+      updatedAt: currentOrderData.updatedAt,
+      number: currentOrderData.number,
+      ingredients: currentOrderData.ingredients,
       ingredientsInfo,
       date,
       total
     };
-  }, [orderData, ingredients]);
+  }, [currentOrderData, ingredients]);
 
   if (!orderInfo) {
     return <Preloader />;

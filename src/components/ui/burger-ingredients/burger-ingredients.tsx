@@ -4,6 +4,7 @@ import { Tab } from '@zlden/react-developer-burger-ui-components';
 import styles from './burger-ingredients.module.css';
 import { BurgerIngredientsUIProps } from './type';
 import { IngredientsCategory } from '@components';
+import { Preloader } from '@ui';
 
 export const BurgerIngredientsUI: FC<BurgerIngredientsUIProps> = memo(
   ({
@@ -17,7 +18,8 @@ export const BurgerIngredientsUI: FC<BurgerIngredientsUIProps> = memo(
     bunsRef,
     mainsRef,
     saucesRef,
-    onTabClick
+    onTabClick,
+    isLoading
   }) => (
     <>
       <section className={styles.burger_ingredients}>
@@ -43,24 +45,30 @@ export const BurgerIngredientsUI: FC<BurgerIngredientsUIProps> = memo(
           </ul>
         </nav>
         <div className={styles.content}>
-          <IngredientsCategory
-            title='Булки'
-            titleRef={titleBunRef}
-            ingredients={buns}
-            ref={bunsRef}
-          />
-          <IngredientsCategory
-            title='Начинки'
-            titleRef={titleMainRef}
-            ingredients={mains}
-            ref={mainsRef}
-          />
-          <IngredientsCategory
-            title='Соусы'
-            titleRef={titleSaucesRef}
-            ingredients={sauces}
-            ref={saucesRef}
-          />
+          {isLoading ? (
+            <Preloader /> // Показываем прелоадер при загрузке
+          ) : (
+            <>
+              <IngredientsCategory
+                title='Булки'
+                titleRef={titleBunRef}
+                ingredients={buns}
+                ref={bunsRef}
+              />
+              <IngredientsCategory
+                title='Начинки'
+                titleRef={titleMainRef}
+                ingredients={mains}
+                ref={mainsRef}
+              />
+              <IngredientsCategory
+                title='Соусы'
+                titleRef={titleSaucesRef}
+                ingredients={sauces}
+                ref={saucesRef}
+              />
+            </>
+          )}
         </div>
       </section>
     </>
