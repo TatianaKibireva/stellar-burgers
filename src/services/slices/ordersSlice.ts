@@ -9,7 +9,7 @@ type TOrdersState = {
   loading: boolean;
 };
 
-const initialState: TOrdersState = {
+export const initialState: TOrdersState = {
   orders: [],
   loading: false
 };
