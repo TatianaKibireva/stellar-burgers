@@ -23,7 +23,7 @@ export const OrderInfo: FC<TOrderInfoProps> = ({
 
   useEffect(() => {
     if (number && !orderByNumber) {
-      dispatch(getOrderByNumber(+number))
+      dispatch(getOrderByNumber(+number));
     }
   }, [dispatch, number, orderByNumber]);
 
